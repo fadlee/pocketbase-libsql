@@ -51,7 +51,7 @@ func main() {
 			}
 
 			logOnce.Do(func() {
-				log.Printf("Connecting to libSQL for main db: %s", dbPath)
+				log.Printf("Connecting to libSQL for main db: %s", libsqlURL)
 			})
 
 			return dbx.Open("libsql", connStr)
