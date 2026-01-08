@@ -10,6 +10,8 @@ import (
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/plugins/jsvm"
+	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
 
@@ -54,6 +56,15 @@ func main() {
 
 			return dbx.Open("libsql", connStr)
 		},
+	})
+
+	jsvm.MustRegister(app, jsvm.Config{
+		HooksWatch: true,
+	})
+
+	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
+		TemplateLang: migratecmd.TemplateLangJS,
+		Automigrate:  true,
 	})
 
 	if err := app.Start(); err != nil {
