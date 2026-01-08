@@ -16,6 +16,7 @@
 
 # PocketBase data directory
 pb_data/
+pb_migrations/
 
 # Environment variables
 .env
