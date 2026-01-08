@@ -1,13 +1,13 @@
 # PocketBase with Turso/libSQL
 
-This project integrates **PocketBase v0.35** with **Turso (libSQL)** as the primary database driver. It uses Turso for the main application data (`data.db`) and local SQLite for the auxiliary data (`auxiliary.db`).
+This project integrates **PocketBase v0.35** with **Turso (libSQL)** as the primary database driver. It uses libSQL for the main application data (`data.db`) and supports an optional libSQL connection for the auxiliary data (`auxiliary.db`), falling back to local SQLite if not configured.
 
 ## Features
 
 - **PocketBase v0.35**: Latest stable version with modern Go API.
 - **Turso/libSQL**: Cloud-native SQLite distribution for distributed data.
-- **Dual Database Strategy**: Turso for main data, local SQLite for logs/system metadata.
-- **Optimized Logging**: Connection status is logged only once on startup.
+- **Flexible Database Strategy**: libSQL for main data, optional libSQL or local SQLite for logs/system metadata.
+- **Optimized Logging**: Connection status is logged once per database on startup.
 - **Pinned Dependencies**: Ensures stability by pinning `modernc.org/sqlite` and `libc` to PocketBase's tested versions.
 
 ## Setup
@@ -16,8 +16,13 @@ This project integrates **PocketBase v0.35** with **Turso (libSQL)** as the prim
 2.  **Configure environment variables**:
     Create a `.env` file or set the following in your environment:
     ```env
+    # Main database
     LIBSQL_DATABASE_URL=libsql://your-db-name.turso.io
     LIBSQL_AUTH_TOKEN=your-auth-token
+
+    # Optional auxiliary database (defaults to local SQLite if not set)
+    # LIBSQL_AUX_DATABASE_URL=libsql://your-aux-db-name.turso.io
+    # LIBSQL_AUX_AUTH_TOKEN=your-aux-auth-token
     ```
 3.  **Install dependencies**:
     ```bash
