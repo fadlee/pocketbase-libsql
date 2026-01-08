@@ -16,8 +16,8 @@ This project integrates **PocketBase v0.35** with **Turso (libSQL)** as the prim
 2.  **Configure environment variables**:
     Create a `.env` file or set the following in your environment:
     ```env
-    TURSO_DATABASE_URL=libsql://your-db-name.turso.io
-    TURSO_AUTH_TOKEN=your-auth-token
+    LIBSQL_DATABASE_URL=libsql://your-db-name.turso.io
+    LIBSQL_AUTH_TOKEN=your-auth-token
     ```
 3.  **Install dependencies**:
     ```bash
