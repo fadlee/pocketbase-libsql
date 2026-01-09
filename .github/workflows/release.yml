@@ -58,8 +58,10 @@ jobs:
           OUT_NORMAL="pocketbase-libsql-${PB_VERSION}-${{ matrix.goos }}-${{ matrix.goarch }}"
           OUT_SLIM="pocketbase-libsql-slim-${PB_VERSION}-${{ matrix.goos }}-${{ matrix.goarch }}"
 
-          go build -trimpath -ldflags="-s -w" -o "dist/${OUT_NORMAL}${EXT}" ./main.go
-          go build -trimpath -tags no_default_driver -ldflags="-s -w" -o "dist/${OUT_SLIM}${EXT}" ./main.go
+          LDFLAGS="-s -w -X github.com/pocketbase/pocketbase.Version=${PB_VERSION}"
+
+          go build -trimpath -ldflags="${LDFLAGS}" -o "dist/${OUT_NORMAL}${EXT}" ./main.go
+          go build -trimpath -tags no_default_driver -ldflags="${LDFLAGS}" -o "dist/${OUT_SLIM}${EXT}" ./main.go
 
       - name: Upload artifact (per target)
         uses: actions/upload-artifact@v4
