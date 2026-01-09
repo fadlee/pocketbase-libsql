@@ -1,0 +1,92 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+          - goos: windows
+            goarch: amd64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Resolve PocketBase module version
+        run: |
+          PB_VERSION=$(go list -m -f '{{.Version}}' github.com/pocketbase/pocketbase)
+          echo "PB_VERSION=$PB_VERSION" >> $GITHUB_ENV
+          echo "PocketBase module version: $PB_VERSION"
+
+      - name: Build binaries
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: "0"
+        run: |
+          mkdir -p dist
+
+          EXT=""
+          if [ "${{ matrix.goos }}" = "windows" ]; then EXT=".exe"; fi
+
+          # Base filenames
+          # pocketbase-libsql (normal)
+          # pocketbase-libsql-slim (no_default_driver)
+          OUT_NORMAL="pocketbase-libsql-${PB_VERSION}-${{ matrix.goos }}-${{ matrix.goarch }}"
+          OUT_SLIM="pocketbase-libsql-slim-${PB_VERSION}-${{ matrix.goos }}-${{ matrix.goarch }}"
+
+          go build -trimpath -ldflags="-s -w" -o "dist/${OUT_NORMAL}${EXT}" ./main.go
+          go build -trimpath -tags no_default_driver -ldflags="-s -w" -o "dist/${OUT_SLIM}${EXT}" ./main.go
+
+      - name: Upload artifact (per target)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ env.PB_VERSION }}-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist_all
+
+      - name: Collect assets
+        run: |
+          mkdir -p release_assets
+          # Flatten nested artifact directories into a single folder for release
+          find dist_all -type f -maxdepth 3 -print -exec cp {} release_assets/ \;
+
+      - name: Create GitHub Release and upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release_assets/*
+          generate_release_notes: true
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
