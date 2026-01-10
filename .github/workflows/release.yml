@@ -27,7 +27,7 @@ jobs:
           - goos: darwin
             goarch: amd64
             os: macos-15-intel
-            cgo: "1"
+            cgo: "0"
           - goos: darwin
             goarch: arm64
             os: macos-latest

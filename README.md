@@ -11,8 +11,9 @@ This project integrates **PocketBase v0.35** with **Turso (libSQL)** using the *
   - **Read-Your-Writes**: Immediate visibility of own writes.
   - **Periodic Sync**: Automatic background synchronization.
 - **Cross-Platform Support**:
-  - ✅ **Linux/macOS**: Full embedded replica support (requires CGO).
-  - ✅ **Windows**: Remote-only fallback via HTTP (no CGO required).
+  - ✅ **Linux/macOS arm64**: Full embedded replica support (requires CGO).
+  - ✅ **macOS amd64**: Remote-only fallback via HTTP (no CGO).
+  - ✅ **Windows**: Remote-only fallback via HTTP (no CGO).
 - **Hybrid Strategy**: libSQL for main data, local-only SQLite for auxiliary data (logs/system).
 - **Graceful Shutdown**: Ensures all pending syncs are flushed on termination.
 
@@ -36,10 +37,16 @@ This project integrates **PocketBase v0.35** with **Turso (libSQL)** using the *
 
 ## Usage
 
-### Development (Linux/macOS)
+### Development (Linux/macOS arm64)
 Requires CGO for embedded replica mode:
 ```bash
 CGO_ENABLED=1 go run . serve
+```
+
+### Development (macOS amd64)
+Runs in remote-only mode (connects directly to Turso via HTTP):
+```bash
+CGO_ENABLED=0 go run . serve
 ```
 
 ### Development (Windows)
@@ -50,8 +57,11 @@ go run . serve
 
 ### Build
 ```bash
-# Linux/macOS (Embedded Replica)
+# Linux/macOS arm64 (Embedded Replica)
 CGO_ENABLED=1 go build -ldflags="-s -w" -o pocketbase-turso .
+
+# macOS Intel (amd64, Remote Fallback, CGO disabled)
+CGO_ENABLED=0 go build -ldflags="-s -w" -o pocketbase-turso .
 
 # Windows (Remote Fallback)
 go build -ldflags="-s -w" -o pocketbase-turso.exe .
@@ -61,13 +71,16 @@ go build -ldflags="-s -w" -o pocketbase-turso.exe .
 
 The project uses Go **build tags** to select the best driver for your platform:
 
-- **Linux/macOS**: Uses `db_embedded.go` which leverages the CGO-based `go-libsql` driver. It creates a local replica of your Turso database in `pb_data/data.db`.
+- **Linux**: Uses `db_embedded.go` which leverages the CGO-based `go-libsql` driver. It creates a local replica of your Turso database in `pb_data/data.db`.
+- **macOS arm64**: Uses `db_embedded.go` with the CGO-based `go-libsql` driver for embedded replicas.
+- **macOS amd64**: Uses `db_darwin_amd64.go` with the pure-Go `libsql-client-go` driver for remote-only HTTP access.
 - **Windows**: Uses `db_windows.go` which leverages the pure-Go `libsql-client-go` driver. It connects directly to Turso over HTTP.
 
 ## Platform Support
 
 - ✅ **Linux** (amd64, arm64) - Full Embedded Replica
-- ✅ **macOS** (amd64, arm64) - Full Embedded Replica
+- ✅ **macOS** (arm64) - Full Embedded Replica
+- ✅ **macOS** (amd64) - Remote-only Fallback
 - ✅ **Windows** (amd64) - Remote-only Fallback
 
 ## License
