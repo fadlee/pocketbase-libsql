@@ -60,8 +60,8 @@ jobs:
 
           LDFLAGS="-s -w -X github.com/pocketbase/pocketbase.Version=${PB_VERSION}"
 
-          go build -trimpath -ldflags="${LDFLAGS}" -o "dist/${OUT_NORMAL}${EXT}" ./main.go
-          go build -trimpath -tags no_default_driver -ldflags="${LDFLAGS}" -o "dist/${OUT_SLIM}${EXT}" ./main.go
+          go build -trimpath -ldflags="${LDFLAGS}" -o "dist/${OUT_NORMAL}${EXT}" .
+          go build -trimpath -tags no_default_driver -ldflags="${LDFLAGS}" -o "dist/${OUT_SLIM}${EXT}" .
 
       - name: Upload artifact (per target)
         uses: actions/upload-artifact@v4
