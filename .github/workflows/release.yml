@@ -11,24 +11,40 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - goos: linux
             goarch: amd64
+            os: ubuntu-latest
+            cgo: "1"
           - goos: linux
             goarch: arm64
+            os: ubuntu-latest
+            cgo: "1"
           - goos: darwin
             goarch: amd64
+            os: macos-latest
+            cgo: "1"
           - goos: darwin
             goarch: arm64
+            os: macos-latest
+            cgo: "1"
           - goos: windows
             goarch: amd64
+            os: ubuntu-latest
+            cgo: "0"
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install cross-compilation tools (Linux ARM64)
+        if: matrix.goos == 'linux' && matrix.goarch == 'arm64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
 
       - uses: actions/setup-go@v5
         with:
@@ -45,7 +61,8 @@ jobs:
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: "0"
+          CGO_ENABLED: ${{ matrix.cgo }}
+          CC: ${{ (matrix.goos == 'linux' && matrix.goarch == 'arm64') && 'aarch64-linux-gnu-gcc' || '' }}
         run: |
           mkdir -p dist
 
