@@ -1,10 +1,10 @@
 # PocketBase with Turso/libSQL (Embedded Replica)
 
-This project integrates **PocketBase v0.35** with **Turso (libSQL)** using the **Embedded Replica** mode. It provides microsecond read latency by serving reads from a local SQLite file while automatically syncing with a remote Turso primary database.
+This project integrates **PocketBase v0.35.1** with **Turso (libSQL)** using the **Embedded Replica** mode. It provides microsecond read latency by serving reads from a local SQLite file while automatically syncing with a remote Turso primary database.
 
 ## Features
 
-- **PocketBase v0.35**: Latest stable version with modern Go API.
+- **PocketBase v0.35.1**: Latest stable version with modern Go API.
 - **Embedded Replicas** (Linux/macOS):
   - **Reads**: Served from local SQLite file (ultra-low latency).
   - **Writes**: Automatically forwarded to the remote primary database.
