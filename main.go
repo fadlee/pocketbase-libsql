@@ -7,12 +7,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/joho/godotenv"
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/plugins/jsvm"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
+	"github.com/spf13/cobra"
 )
 
 // Shared state for platform-specific DB implementations
@@ -49,6 +51,15 @@ func main() {
 	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
 		TemplateLang: migratecmd.TemplateLangJS,
 		Automigrate:  true,
+	})
+
+	app.RootCmd.AddCommand(&cobra.Command{
+		Use:   "update",
+		Short: "Update the current app executable (disabled in this build)",
+		Run: func(cmd *cobra.Command, args []string) {
+			color.Yellow("Self-update is disabled in this build.")
+			color.Cyan("Please download the latest release from: https://github.com/fadlee/pocketbase-libsql/releases")
+		},
 	})
 
 	if err := app.Start(); err != nil {
