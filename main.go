@@ -25,7 +25,11 @@ var (
 func main() {
 	_ = godotenv.Load()
 
-	// Configuration from environment
+	if shouldSkipDBInit() {
+		handleNonDBCommand()
+		return
+	}
+
 	libsqlURL := os.Getenv("LIBSQL_DATABASE_URL")
 	libsqlToken := os.Getenv("LIBSQL_AUTH_TOKEN")
 	syncIntervalSec := getEnvInt("LIBSQL_SYNC_INTERVAL", 60)
@@ -37,13 +41,11 @@ func main() {
 		},
 	})
 
-	// Graceful shutdown
 	app.OnTerminate().BindFunc(func(e *core.TerminateEvent) error {
 		closeConnectors()
 		return e.Next()
 	})
 
-	// Register plugins
 	jsvm.MustRegister(app, jsvm.Config{
 		HooksWatch: true,
 	})
@@ -67,7 +69,6 @@ func main() {
 	}
 }
 
-// Helper to get int from env with default
 func getEnvInt(key string, defaultVal int) int {
 	if val := os.Getenv(key); val != "" {
 		if i, err := strconv.Atoi(val); err == nil {
@@ -75,4 +76,41 @@ func getEnvInt(key string, defaultVal int) int {
 		}
 	}
 	return defaultVal
+}
+
+func shouldSkipDBInit() bool {
+	if len(os.Args) < 2 {
+		return true
+	}
+
+	cmd := os.Args[1]
+
+	if cmd == "update" || cmd == "--help" || cmd == "-h" || cmd == "--version" || cmd == "-v" || cmd == "help" {
+		return true
+	}
+
+	return false
+}
+
+func handleNonDBCommand() {
+	if len(os.Args) >= 2 && os.Args[1] == "update" {
+		color.Yellow("Self-update is disabled in this build.")
+		color.Cyan("Please download the latest release from: https://github.com/fadlee/pocketbase-libsql/releases")
+		return
+	}
+
+	app := pocketbase.New()
+
+	app.RootCmd.AddCommand(&cobra.Command{
+		Use:   "update",
+		Short: "Update the current app executable (disabled in this build)",
+		Run: func(cmd *cobra.Command, args []string) {
+			color.Yellow("Self-update is disabled in this build.")
+			color.Cyan("Please download the latest release from: https://github.com/fadlee/pocketbase-libsql/releases")
+		},
+	})
+
+	if err := app.RootCmd.Execute(); err != nil {
+		log.Fatal(err)
+	}
 }
