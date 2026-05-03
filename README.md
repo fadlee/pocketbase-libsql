@@ -98,6 +98,28 @@ Published container registries on release:
 - Docker Hub: `fadlee/pocketbase-libsql`
 - GHCR: `ghcr.io/fadlee/pocketbase-libsql`
 
+## NPX wrapper
+
+Run release binary directly with `npx`:
+
+```bash
+npx pocketbase-libsql-bin serve
+```
+
+Pin specific wrapper release:
+
+```bash
+npx pocketbase-libsql-bin --pbl-version 0.37.5 serve
+```
+
+Or set version via environment variable:
+
+```bash
+POCKETBASE_LIBSQL_VERSION=0.37.5 npx pocketbase-libsql-bin serve
+```
+
+The npm wrapper downloads matching GitHub release binaries from this repository and caches them locally in `~/.cache/pocketbase-libsql-bin`.
+
 ## Usage
 
 ### Development (Linux/macOS arm64)

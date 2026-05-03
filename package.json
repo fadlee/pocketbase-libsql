@@ -1,0 +1,54 @@
+{
+  "name": "pocketbase-libsql-bin",
+  "version": "0.0.0-development",
+  "description": "PocketBase libSQL binary wrapper for npx with GitHub release downloads",
+  "main": "bin/runner.js",
+  "bin": {
+    "pocketbase-libsql-bin": "bin/runner.js"
+  },
+  "scripts": {
+    "test": "node bin/runner.js --help"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "README.md"
+  ],
+  "keywords": [
+    "pocketbase",
+    "libsql",
+    "turso",
+    "binary",
+    "wrapper",
+    "cli",
+    "npx"
+  ],
+  "author": {
+    "name": "Fadlee",
+    "email": "fad.lee@hotmail.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fadlee/pocketbase-libsql.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fadlee/pocketbase-libsql/issues"
+  },
+  "homepage": "https://github.com/fadlee/pocketbase-libsql#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
