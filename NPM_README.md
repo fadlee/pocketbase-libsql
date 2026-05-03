@@ -2,22 +2,12 @@
 
 Run `pocketbase-libsql` release binaries from npm via `npx`.
 
+Package version matches repository release version and downloads matching binary automatically.
+
 ## Usage
 
 ```bash
 npx pocketbase-libsql-bin serve
-```
-
-Use specific release:
-
-```bash
-npx pocketbase-libsql-bin --pbl-version 0.37.5 serve
-```
-
-Use environment variable:
-
-```bash
-POCKETBASE_LIBSQL_VERSION=0.37.5 npx pocketbase-libsql-bin serve
 ```
 
 ## How it works

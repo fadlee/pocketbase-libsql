@@ -3,50 +3,27 @@
 const { spawn } = require('node:child_process');
 const { ensureBinary } = require('../lib/downloader');
 
-function stripWrapperArgs(rawArgs) {
-  const args = [];
-
-  for (let i = 0; i < rawArgs.length; i += 1) {
-    const arg = rawArgs[i];
-
-    if (arg === '--pb-version' || arg === '--pbl-version') {
-      i += 1;
-      continue;
-    }
-
-    args.push(arg);
-  }
-
-  return args;
-}
-
 function printWrapperHelp() {
   console.log(`
-PocketBase libSQL npm wrapper - Additional options:
+PocketBase libSQL npm wrapper
 
-  --pbl-version <version>  Use specific pocketbase-libsql release version
-  --pb-version <version>   Alias for --pbl-version
-
-Environment variables:
-  POCKETBASE_LIBSQL_VERSION  Set default wrapper release version to use
+This package version matches repository release version and downloads matching binary automatically.
 
 Examples:
   npx pocketbase-libsql-bin serve
-  npx pocketbase-libsql-bin --pbl-version 0.37.5 serve
-  POCKETBASE_LIBSQL_VERSION=0.37.5 npx pocketbase-libsql-bin serve
+  npx pocketbase-libsql-bin --help
 `);
 }
 
 async function main() {
   try {
-    const rawArgs = process.argv.slice(2);
-    const args = stripWrapperArgs(rawArgs);
+    const args = process.argv.slice(2);
 
-    if (rawArgs.includes('--help') || rawArgs.includes('-h')) {
+    if (args.includes('--help') || args.includes('-h')) {
       printWrapperHelp();
     }
 
-    const binaryPath = await ensureBinary(rawArgs);
+    const binaryPath = await ensureBinary();
 
     const child = spawn(binaryPath, args, {
       stdio: 'inherit',

@@ -1,6 +1,6 @@
 {
   "name": "pocketbase-libsql-bin",
-  "version": "0.0.0-development",
+  "version": "0.37.5",
   "description": "PocketBase libSQL binary wrapper for npx with GitHub release downloads",
   "main": "bin/runner.js",
   "bin": {

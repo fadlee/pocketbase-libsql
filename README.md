@@ -106,19 +106,7 @@ Run release binary directly with `npx`:
 npx pocketbase-libsql-bin serve
 ```
 
-Pin specific wrapper release:
-
-```bash
-npx pocketbase-libsql-bin --pbl-version 0.37.5 serve
-```
-
-Or set version via environment variable:
-
-```bash
-POCKETBASE_LIBSQL_VERSION=0.37.5 npx pocketbase-libsql-bin serve
-```
-
-The npm wrapper downloads matching GitHub release binaries from this repository and caches them locally in `~/.cache/pocketbase-libsql-bin`.
+The npm package version matches repository release version and downloads matching GitHub release binaries from this repository. Downloaded binaries are cached locally in `~/.cache/pocketbase-libsql-bin`.
 
 ## Usage
 
