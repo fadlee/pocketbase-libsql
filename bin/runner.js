@@ -1,7 +1,26 @@
 #!/usr/bin/env node
 
 const { spawn } = require('node:child_process');
+const path = require('node:path');
 const { ensureBinary } = require('../lib/downloader');
+
+function hasDirArg(args) {
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i];
+    if (arg === '--dir' || arg.startsWith('--dir=')) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function withDefaultDir(args) {
+  if (hasDirArg(args)) {
+    return args;
+  }
+
+  return [...args, `--dir=${path.join(process.cwd(), 'pb_data')}`];
+}
 
 function printWrapperHelp() {
   console.log(`
@@ -11,15 +30,17 @@ This package version matches repository release version and downloads matching b
 
 Examples:
   npx pocketbase-libsql-bin serve
+  npx pocketbase-libsql-bin --dir=./pb_data serve
   npx pocketbase-libsql-bin --help
 `);
 }
 
 async function main() {
   try {
-    const args = process.argv.slice(2);
+    const rawArgs = process.argv.slice(2);
+    const args = withDefaultDir(rawArgs);
 
-    if (args.includes('--help') || args.includes('-h')) {
+    if (rawArgs.includes('--help') || rawArgs.includes('-h')) {
       printWrapperHelp();
     }
 
