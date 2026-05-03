@@ -46,21 +46,16 @@ func dbConnect(dbPath string, url string, token string, syncInterval time.Durati
 		return core.DefaultDBConnect(dbPath)
 	}
 
-	if !seen[dbPath] {
-		log.Printf("[DB] Connecting to remote libSQL (Windows fallback):")
-		log.Printf("     Remote: %s", url)
-		log.Printf("     Note: Embedded replica is not supported on Windows")
-		seen[dbPath] = true
+	connStr, err := buildLibSQLConnectionString(url, token)
+	if err != nil {
+		return nil, err
 	}
 
-	// Windows fallback uses HTTP driver via connection string
-	connStr := url
-	if token != "" {
-		if strings.Contains(connStr, "?") {
-			connStr += "&authToken=" + token
-		} else {
-			connStr += "?authToken=" + token
-		}
+	if !seen[dbPath] {
+		log.Printf("[DB] Connecting to remote libSQL (Windows fallback):")
+		log.Printf("     Remote: %s", maskLibSQLURL(connStr))
+		log.Printf("     Note: Embedded replica is not supported on Windows")
+		seen[dbPath] = true
 	}
 
 	return dbx.Open("libsql", connStr)

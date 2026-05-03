@@ -55,7 +55,7 @@ func dbConnect(dbPath string, url string, token string, syncInterval time.Durati
 
 	log.Printf("[DB] Creating embedded replica for main db:")
 	log.Printf("     Local:  %s", dbPath)
-	log.Printf("     Remote: %s", url)
+	log.Printf("     Remote: %s", maskLibSQLURL(url))
 	log.Printf("     Sync:   every %v", syncInterval)
 
 	// Create embedded replica connector
@@ -92,6 +92,13 @@ func closeConnectors() {
 
 	for path, c := range connectors {
 		if c != nil {
+			log.Printf("[DB] Performing final sync for embedded replica %s...", path)
+			if _, err := c.Sync(); err != nil {
+				log.Printf("[DB] Warning during final sync for %s: %v", path, err)
+			} else {
+				log.Printf("[DB] Final sync complete for %s", path)
+			}
+
 			log.Printf("[DB] Closing embedded replica connector for %s...", path)
 			if err := c.Close(); err != nil {
 				log.Printf("[DB] Warning closing connector for %s: %v", path, err)

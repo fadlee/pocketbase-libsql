@@ -10,7 +10,24 @@ permissions:
   contents: write
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Run vet
+        run: go vet ./...
+
   build:
+    needs: test
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -80,6 +97,13 @@ jobs:
           go build -trimpath -ldflags="${LDFLAGS}" -o "dist/${OUT_NORMAL}${EXT}" .
           go build -trimpath -tags no_default_driver -ldflags="${LDFLAGS}" -o "dist/${OUT_SLIM}${EXT}" .
 
+          if [ "${{ matrix.goos }}" = "linux" ] && [ "${{ matrix.goarch }}" = "amd64" ]; then
+            "dist/${OUT_NORMAL}${EXT}" --help >/dev/null
+            "dist/${OUT_NORMAL}${EXT}" --version >/dev/null
+            "dist/${OUT_SLIM}${EXT}" --help >/dev/null
+            "dist/${OUT_SLIM}${EXT}" --version >/dev/null
+          fi
+
       - name: Upload artifact (per target)
         uses: actions/upload-artifact@v4
         with:
@@ -100,7 +124,9 @@ jobs:
         run: |
           mkdir -p release_assets
           # Flatten nested artifact directories into a single folder for release
-          find dist_all -type f -maxdepth 3 -print -exec cp {} release_assets/ \;
+          find dist_all -maxdepth 3 -type f -print -exec cp {} release_assets/ \;
+          cd release_assets
+          find . -maxdepth 1 -type f ! -name checksums.txt -printf '%f\0' | sort -z | xargs -0 sha256sum > checksums.txt
 
       - name: Create GitHub Release and upload assets
         uses: softprops/action-gh-release@v2

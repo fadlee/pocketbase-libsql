@@ -1,4 +1,4 @@
-module myapp
+module github.com/fadlee/pocketbase-libsql
 
 go 1.26.2
 

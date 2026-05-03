@@ -27,9 +27,34 @@ This project integrates **PocketBase v0.37.5** with **Turso (libSQL)** using the
     LIBSQL_DATABASE_URL=libsql://your-db-name.turso.io
     LIBSQL_AUTH_TOKEN=your-auth-token
 
+    # Optional: Fail fast if remote config is missing (recommended in production)
+    LIBSQL_REQUIRE_REMOTE=false
+
     # Optional: Sync interval in seconds (defaults to 60)
     # LIBSQL_SYNC_INTERVAL=60
     ```
+
+### Environment variables
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `LIBSQL_DATABASE_URL` | Production: yes | empty | Turso/libSQL remote database URL, for example `libsql://your-db-name.turso.io`. If empty and `LIBSQL_REQUIRE_REMOTE=false`, main DB falls back to local SQLite. |
+| `LIBSQL_AUTH_TOKEN` | Production: yes | empty | Turso auth token. Required when `LIBSQL_REQUIRE_REMOTE=true`. |
+| `LIBSQL_REQUIRE_REMOTE` | no | `false` | Set to `true` in production to fail fast when remote URL or token is missing. Prevents accidental local SQLite usage. |
+| `LIBSQL_SYNC_INTERVAL` | no | `60` | Embedded replica background sync interval in seconds. Invalid values use default `60`. |
+
+### Production safety
+
+Set this in production:
+
+```env
+LIBSQL_REQUIRE_REMOTE=true
+```
+
+With this enabled, startup fails if `LIBSQL_DATABASE_URL` or `LIBSQL_AUTH_TOKEN` is missing. This prevents accidental production boot using local SQLite.
+
+Remote URLs printed in logs are masked when an `authToken` query parameter is present.
+
 3.  **Install dependencies**:
     ```bash
     go mod tidy
@@ -75,6 +100,18 @@ The project uses Go **build tags** to select the best driver for your platform:
 - **macOS arm64**: Uses `db_embedded.go` with the CGO-based `go-libsql` driver for embedded replicas.
 - **macOS amd64**: Uses `db_darwin_amd64.go` with the pure-Go `libsql-client-go` driver for remote-only HTTP access.
 - **Windows**: Uses `db_windows.go` which leverages the pure-Go `libsql-client-go` driver. It connects directly to Turso over HTTP.
+
+## Shutdown behavior
+
+On Linux and macOS arm64 embedded replica builds, the app attempts a final `Sync()` before closing the libSQL connector during PocketBase termination. If final sync fails, shutdown continues and logs a warning because network failures can happen during process termination.
+
+## Release checksums
+
+Release assets include `checksums.txt` with SHA-256 hashes. Verify a downloaded binary from the release asset directory with:
+
+```bash
+sha256sum -c checksums.txt --ignore-missing
+```
 
 ## Platform Support
 
