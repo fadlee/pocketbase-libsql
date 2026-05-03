@@ -81,6 +81,11 @@ docker run --rm -p 8090:8090 \
 
 Image stores PocketBase data in `/pb/pb_data` and exposes port `8090`.
 
+Published container registries on release:
+
+- Docker Hub: `fadlee/pocketbase-libsql`
+- GHCR: `ghcr.io/fadlee/pocketbase-libsql`
+
 ## Usage
 
 ### Development (Linux/macOS arm64)
