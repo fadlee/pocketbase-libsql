@@ -60,6 +60,27 @@ Remote URLs printed in logs are masked when an `authToken` query parameter is pr
     go mod tidy
     ```
 
+## Docker
+
+Build image locally:
+
+```bash
+docker build -t fadlee/pocketbase-libsql:local .
+```
+
+Run container:
+
+```bash
+docker run --rm -p 8090:8090 \
+  -e LIBSQL_DATABASE_URL=libsql://your-db-name.turso.io \
+  -e LIBSQL_AUTH_TOKEN=your-auth-token \
+  -e LIBSQL_REQUIRE_REMOTE=true \
+  -v $(pwd)/pb_data:/pb/pb_data \
+  fadlee/pocketbase-libsql:local
+```
+
+Image stores PocketBase data in `/pb/pb_data` and exposes port `8090`.
+
 ## Usage
 
 ### Development (Linux/macOS arm64)
