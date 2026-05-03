@@ -5,15 +5,20 @@ This project integrates **PocketBase v0.37.5** with **Turso (libSQL)** using the
 ## Features
 
 - **PocketBase v0.37.5**: Latest stable version with modern Go API.
-- **Embedded Replicas** (Linux/macOS):
+- **Embedded Replicas** (where supported):
   - **Reads**: Served from local SQLite file (ultra-low latency).
   - **Writes**: Automatically forwarded to the remote primary database.
   - **Read-Your-Writes**: Immediate visibility of own writes.
   - **Periodic Sync**: Automatic background synchronization.
 - **Cross-Platform Support**:
-  - ✅ **Linux/macOS arm64**: Full embedded replica support (requires CGO).
-  - ✅ **macOS amd64**: Remote-only fallback via HTTP (no CGO).
-  - ✅ **Windows**: Remote-only fallback via HTTP (no CGO).
+  - ✅ **Linux** (amd64, arm64): Full embedded replica support in this project (requires CGO).
+  - ✅ **macOS arm64**: Full embedded replica support (requires CGO).
+  - ✅ **macOS amd64**: Remote-only fallback via HTTP.
+  - ✅ **Windows**: Remote-only fallback via HTTP.
+- **Why support differs**:
+  - Full embedded replica mode depends on native libSQL driver availability and platform compatibility.
+  - This project uses the CGO-based `go-libsql` driver where embedded replicas are supported.
+  - On unsupported targets in this project, it falls back to the pure-Go `libsql-client-go` remote client instead of local embedded replica mode.
 - **Hybrid Strategy**: libSQL for main data, local-only SQLite for auxiliary data (logs/system).
 - **Graceful Shutdown**: Ensures all pending syncs are flushed on termination.
 
@@ -81,6 +86,13 @@ docker run --rm -p 8090:8090 \
 
 Image stores PocketBase data in `/pb/pb_data` and exposes port `8090`.
 
+Docker image behavior notes:
+
+- Published container images target Linux only: `linux/amd64` and `linux/arm64`
+- These Linux images are intended to run with full embedded replica support when remote libSQL config is provided
+- If `LIBSQL_DATABASE_URL` is missing and `LIBSQL_REQUIRE_REMOTE=false`, main database falls back to local SQLite
+- In production, set `LIBSQL_REQUIRE_REMOTE=true` to prevent accidental local fallback
+
 Published container registries on release:
 
 - Docker Hub: `fadlee/pocketbase-libsql`
@@ -141,7 +153,7 @@ sha256sum -c checksums.txt --ignore-missing
 
 ## Platform Support
 
-- ✅ **Linux** (amd64, arm64) - Full Embedded Replica
+- ✅ **Linux** (amd64, arm64) - Full Embedded Replica in this project
 - ✅ **macOS** (arm64) - Full Embedded Replica
 - ✅ **macOS** (amd64) - Remote-only Fallback
 - ✅ **Windows** (amd64) - Remote-only Fallback
