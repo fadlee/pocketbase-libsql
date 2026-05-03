@@ -4,9 +4,11 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 on:
-  release:
+  workflow_run:
+    workflows:
+      - release
     types:
-      - published
+      - completed
   workflow_dispatch: {}
 
 permissions:
@@ -16,11 +18,24 @@ permissions:
 jobs:
   docker:
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' && github.event.action == 'published'
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout release commit
+        uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+
+      - name: Resolve release tag
+        id: tag
+        run: |
+          TAG=$(git tag --points-at HEAD | sort -V | tail -n 1)
+          if [ -z "$TAG" ]; then
+            echo "No tag found for workflow_run head SHA" >&2
+            exit 1
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Release tag: $TAG"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -49,7 +64,7 @@ jobs:
             fadlee/pocketbase-libsql
             ghcr.io/fadlee/pocketbase-libsql
           tags: |
-            type=raw,value=${{ github.event.release.tag_name }}
+            type=raw,value=${{ steps.tag.outputs.tag }}
             type=raw,value=latest
 
       - name: Resolve PocketBase module version
